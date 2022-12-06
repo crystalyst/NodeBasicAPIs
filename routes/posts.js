@@ -23,7 +23,7 @@ router.post('/', async (req, res) => {
 
 // Get the full lit of the posts
 router.get("/", async (req, res) => {
-  const posts = await Post.find({}).sort({date: -1});
+  const posts = await Post.find({}).sort({ createdAt: -1});
   let result = [];
   for (post of posts) {
     const temp = {
