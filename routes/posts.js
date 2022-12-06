@@ -23,27 +23,36 @@ router.post('/', async (req, res) => {
 
 // Get the full lit of the posts
 router.get("/", async (req, res) => {
-  const posts = await Post.find({}).sort({ createdAt: -1});
-  let result = [];
-  for (post of posts) {
-    const temp = {
-        postId: post._id.toString(),
-        user: post.user,
-        title: post.title,
-        createdAt: post.createdAt
+  try {
+    const posts = await Post.find({}).sort({ createdAt: -1});
+    let result = [];
+    for (post of posts) {
+        const temp = {
+            postId: post._id.toString(),
+            user: post.user,
+            title: post.title,
+            createdAt: post.createdAt
+        }
+        result.push(temp);
     }
-    result.push(temp);
+    
+    res.status(200).json({
+        data: result,
+    });
+  }
+  catch (err) {
+    res.status(400).json({ message: `${err} has occurred`})
   }
   
-  res.status(200).json({
-    data: result,
-  });
 });
 
 // Get one post by postId params
 router.get('/:_postId', async (req, res) => {
     try {
         const { _postId } = req.params;
+        if (!_postId) {
+            return res.status(400).json({ message: "Invalid Input" });
+        }
         const targetPost = await Post.findOne({ _id: _postId });
         const temp = {
             postId: targetPost._id.toString(),
@@ -58,9 +67,7 @@ router.get('/:_postId', async (req, res) => {
     }
     catch (err) {
         console.log(`${err} has occurred`);
-        return res
-            .status(400)
-            .json({ message: "Incorrect Data Format"});
+        return res.status(404).json({ message: "No Such Post exists"});
     }
 
 });
@@ -107,7 +114,7 @@ router.delete('/:_postId', async (req, res) => {
             await Post.deleteOne({ _id: _postId });
         }
         else {
-            return res.status(200).json({ message: "Incorrect Password" });
+            return res.status(400).json({ message: "Incorrect Password" });
         }
         return res.status(200).json({ message: "Successfully Deleted the post" })
     }
